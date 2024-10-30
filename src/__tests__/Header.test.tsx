@@ -10,7 +10,7 @@ jest.mock('@reown/appkit/react', () => ({
 describe('Header', () => {
   it('renders the site name', () => {
     render(<Header />)
-    const siteName = screen.getByText('Genji')
+    const siteName = screen.getByText('Hamsterverse')
     expect(siteName).toBeInTheDocument()
   })
 })

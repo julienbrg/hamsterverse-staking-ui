@@ -80,25 +80,25 @@ export default function Home() {
     }
   }
 
-  const faucetTx = async () => {
-    try {
-      const response = await fetch('/api/faucet', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ address }),
-      })
-      const data = await response.json()
-      if (!response.ok) {
-        throw new Error(data.message || 'Faucet request failed')
-      }
-      return data.txHash
-    } catch (error) {
-      console.error('Faucet error:', error)
-      throw error
-    }
-  }
+  // const faucetTx = async () => {
+  //   try {
+  //     const response = await fetch('/api/faucet', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({ address }),
+  //     })
+  //     const data = await response.json()
+  //     if (!response.ok) {
+  //       throw new Error(data.message || 'Faucet request failed')
+  //     }
+  //     return data.txHash
+  //   } catch (error) {
+  //     console.error('Faucet error:', error)
+  //     throw error
+  //   }
+  // }
 
   const doSomething = async () => {
     setTxHash(undefined)
@@ -125,14 +125,15 @@ export default function Home() {
         const erc20 = new Contract(ERC20_CONTRACT_ADDRESS, ERC20_CONTRACT_ABI, signer)
 
         ///// Send ETH if needed /////
-        const bal = await getBal()
-        console.log('bal:', bal)
-        if (bal < 0.025) {
-          const faucetTxHash = await faucetTx()
-          console.log('faucet tx:', faucetTxHash)
-          const bal = await getBal()
-          console.log('bal:', bal)
-        }
+        // const bal = await getBal()
+        // console.log('bal:', bal)
+        // if (bal < 0.025) {
+        //   const faucetTxHash = await faucetTx()
+        //   console.log('faucet tx:', faucetTxHash)
+        //   const bal = await getBal()
+        //   console.log('bal:', bal)
+        // }
+
         ///// Call /////
         const call = await erc20.mint(parseEther('10000')) // 0.000804454399826656 ETH // https://sepolia.etherscan.io/tx/0x687e32332965aa451abe45f89c9fefc4b5afe6e99c95948a300565f16a212d7b
 
