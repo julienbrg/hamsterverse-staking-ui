@@ -9,6 +9,8 @@ import { LinkComponent } from '../components/layout/LinkComponent'
 import { ethers } from 'ethers'
 import { Head } from '../components/layout/Head'
 import { SITE_NAME, SITE_DESCRIPTION } from '../utils/config'
+import * as hamsterverse from '../utils/Hamsterverse.json'
+import * as token from '../utils/MockERC20.json'
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -24,6 +26,7 @@ export default function Home() {
   const toast = useToast()
 
   useEffect(() => {
+    console.log('hamsterverse address:', hamsterverse.address)
     if (isConnected) {
       setTxHash(undefined)
       getNetwork()
@@ -122,7 +125,7 @@ export default function Home() {
         const ethersProvider = new BrowserProvider(walletProvider as Eip1193Provider)
         const signer = await ethersProvider.getSigner()
 
-        const erc20 = new Contract(ERC20_CONTRACT_ADDRESS, ERC20_CONTRACT_ABI, signer)
+        const nft = new Contract(hamsterverse.address, hamsterverse.abi, signer)
 
         ///// Send ETH if needed /////
         // const bal = await getBal()
@@ -134,8 +137,16 @@ export default function Home() {
         //   console.log('bal:', bal)
         // }
 
+        ///// Approve /////
+
+        const erc20 = new Contract(token.address, token.abi, signer)
+
+        const approve = await erc20.approve(hamsterverse.address, parseEther('200'))
+        await approve.wait(1)
+
         ///// Call /////
-        const call = await erc20.mint(parseEther('10000')) // 0.000804454399826656 ETH // https://sepolia.etherscan.io/tx/0x687e32332965aa451abe45f89c9fefc4b5afe6e99c95948a300565f16a212d7b
+        const uri = 'ipfs://bafkreiglxpmys7hxse45nd3ajnjzq2vjjevrlwjphtcco3pd53eq6zqu5i'
+        const call = await nft.mint(signer.address, uri, parseEther('200'))
 
         let receipt: ethers.ContractTransactionReceipt | null = null
         try {

@@ -10,7 +10,7 @@ const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || ''
 
 const metadata = {
   name: 'Hamsterverse',
-  description: 'Stake your governance tokens and get some rewards while keeping control over the delegation',
+  description: 'Stake your governance tokens in an NFT and get some rewards while keeping control over the delegation',
   url: 'https://hamsterverse.on-fleek.app',
   icons: ['./favicon.ico'],
 }
