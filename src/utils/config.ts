@@ -1,6 +1,6 @@
 import { ThemingProps } from '@chakra-ui/react'
-export const SITE_DESCRIPTION = 'W3HC Next.js app template'
-export const SITE_NAME = 'Hamsterverse'
+export const SITE_DESCRIPTION = 'Stake your governance tokens and get some rewards while keeping control over the delegation.'
+export const SITE_NAME = 'Hamsterverse Staking'
 export const SITE_URL = 'https://hamsterverse.on-fleek.app'
 
 export const THEME_INITIAL_COLOR = 'system'
