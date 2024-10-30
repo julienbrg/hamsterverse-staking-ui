@@ -2,24 +2,24 @@
 import React, { ReactNode, createContext, useContext } from 'react'
 import { createAppKit, useAppKitProvider } from '@reown/appkit/react'
 import { EthersAdapter } from '@reown/appkit-adapter-ethers'
-import { sepolia, optimism, zksync, base, arbitrum, gnosis, polygon, polygonZkEvm, mantle, celo, avalanche, degen } from '@reown/appkit/networks'
+import { sepolia, base } from '@reown/appkit/networks'
 
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || ''
 
 // https://docs.reown.com/appkit/react/core/custom-networks
 
 const metadata = {
-  name: 'Genji',
-  description: 'Next.js + Web3 Modal + Ethers.js + Chakra UI',
-  url: 'https://genji.netlify.app',
+  name: 'Hamsterverse',
+  description: 'Stake your governance tokens and get some rewards while keeping control over the delegation',
+  url: 'https://hamsterverse.on-fleek.app',
   icons: ['./favicon.ico'],
 }
 
 createAppKit({
   adapters: [new EthersAdapter()],
   metadata,
-  networks: [sepolia, optimism, zksync, base, arbitrum, gnosis, polygon, polygonZkEvm, mantle, celo, avalanche, degen],
-  defaultNetwork: sepolia,
+  networks: [base, sepolia],
+  defaultNetwork: base,
   projectId,
   features: {
     email: true,
@@ -30,7 +30,7 @@ createAppKit({
 const AppKitContext = createContext<ReturnType<typeof useAppKitProvider> | null>(null)
 
 export function Web3Modal({ children }: { children: ReactNode }) {
-  const appKitProvider = useAppKitProvider('eip155:11155111' as any)
+  const appKitProvider = useAppKitProvider('eip155:8453' as any)
 
   return <AppKitContext.Provider value={appKitProvider}>{children}</AppKitContext.Provider>
 }

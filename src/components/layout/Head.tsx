@@ -9,7 +9,7 @@ interface Props {
 
 export function Head({ title, description }: Props) {
   const origin = typeof window !== 'undefined' && window.location.origin ? window.location.origin : SITE_URL
-  const img = `${origin}/huangshan.png`
+  const img = `https://bafkreicctn5ua3ctzctk62d4vpbsvipzlakdja4hzgh2nkwwauayrf76iy.ipfs.w3s.link/`
 
   return (
     <NextHead>
@@ -19,7 +19,7 @@ export function Head({ title, description }: Props) {
       <meta property="og:url" content={origin} />
       <meta name="twitter:card" content={img} />
       <meta name="twitter:site" content="@W3HC8" />
-      <meta name="twitter:title" content="Genji" />
+      <meta name="twitter:title" content="Hamsterverse" />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={img} />
     </NextHead>

@@ -1,7 +1,6 @@
 {
-  "name": "genji",
-  "description": "A Next.js Web3 app template",
-  "version": "0.1.0",
+  "name": "hamsterverse-staking-ui",
+  "description": "Hamsterverse Staking UI",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
