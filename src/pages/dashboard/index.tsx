@@ -56,6 +56,21 @@ const NFTCard = ({
   const [isStaking, setIsStaking] = useState(false)
   const [isWithdrawing, setIsWithdrawing] = useState(false)
   const [isTransferringNFT, setIsTransferringNFT] = useState(false)
+  const [currentRewards, setCurrentRewards] = useState(Math.round(parseFloat(nft.pendingRewards)))
+
+  // Set up the interval for incrementing rewards
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentRewards((prev) => prev + 1)
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [])
+
+  // Update the initial rewards when nft.pendingRewards changes
+  useEffect(() => {
+    setCurrentRewards(Math.round(parseFloat(nft.pendingRewards)))
+  }, [nft.pendingRewards])
 
   const { walletProvider } = useAppKitProvider('eip155')
   const toast = useToast()
@@ -285,7 +300,7 @@ const NFTCard = ({
         </Stat>
         <Stat>
           <StatLabel>Pending Rewards</StatLabel>
-          <StatNumber>{parseFloat(nft.pendingRewards).toFixed(4)}</StatNumber>
+          <StatNumber>{currentRewards}</StatNumber>
           <StatHelpText>RGCVII Tokens</StatHelpText>
         </Stat>
         <Stat>
@@ -294,7 +309,7 @@ const NFTCard = ({
           <StatHelpText>{timeStaked} days</StatHelpText>
         </Stat>
         <Box>
-          <Button colorScheme="blue" size="sm" width="full" onClick={() => onWithdrawRewards(nft.tokenId)} isLoading={isLoading} isDisabled={false}>
+          <Button colorScheme="blue" size="sm" width="full" onClick={() => onWithdrawRewards(nft.tokenId)} isLoading={isLoading} isDisabled={true}>
             Claim Rewards
           </Button>
         </Box>
