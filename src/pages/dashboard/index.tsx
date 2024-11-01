@@ -309,7 +309,7 @@ const NFTCard = ({
           <StatHelpText>{timeStaked} days</StatHelpText>
         </Stat>
         <Box>
-          <Button colorScheme="blue" size="sm" width="full" onClick={() => onWithdrawRewards(nft.tokenId)} isLoading={isLoading} isDisabled={true}>
+          <Button colorScheme="blue" size="sm" width="full" onClick={() => onWithdrawRewards(nft.tokenId)} isLoading={isLoading} isDisabled={false}>
             Claim Rewards
           </Button>
         </Box>
