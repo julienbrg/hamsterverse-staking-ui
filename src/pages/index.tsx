@@ -1,12 +1,10 @@
-import * as React from 'react'
-import { Text, Button, useToast, Box } from '@chakra-ui/react'
+import React from 'react'
+import { Text, Button, useToast, Box, Input, FormControl, FormLabel, InputGroup, InputRightAddon } from '@chakra-ui/react'
 import { useState, useEffect } from 'react'
-import { BrowserProvider, Contract, Eip1193Provider, parseEther } from 'ethers'
-// import { useAppKitAccount, useAppKitProvider, useWalletInfo } from '@reown/appkit/react'
+import { BrowserProvider, Contract, Eip1193Provider, parseEther, formatEther } from 'ethers'
 import { useAppKitAccount, useAppKitProvider } from '@reown/appkit/react'
 import { ERC20_CONTRACT_ADDRESS, ERC20_CONTRACT_ABI } from '../utils/erc20'
 import { LinkComponent } from '../components/layout/LinkComponent'
-import { ethers } from 'ethers'
 import { Head } from '../components/layout/Head'
 import { SITE_NAME, SITE_DESCRIPTION } from '../utils/config'
 import * as hamsterverse from '../utils/Hamsterverse.json'
@@ -17,24 +15,21 @@ export default function Home() {
   const [txLink, setTxLink] = useState<string>()
   const [txHash, setTxHash] = useState<string>()
   const [balance, setBalance] = useState<string>('0')
+  const [tokenBalance, setTokenBalance] = useState<string>('0')
   const [network, setNetwork] = useState<string>('Unknown')
-  // const [loginType, setLoginType] = useState<string>('Not connected')
+  const [mintAmount, setMintAmount] = useState<string>('')
 
   const { address, isConnected, caipAddress } = useAppKitAccount()
   const { walletProvider } = useAppKitProvider('eip155')
-  // const { walletInfo } = useWalletInfo()
   const toast = useToast()
 
   useEffect(() => {
-    console.log('hamsterverse address:', hamsterverse.address)
     if (isConnected) {
       setTxHash(undefined)
       getNetwork()
-      // updateLoginType()
       getBal()
+      getTokenBalance()
       console.log('user address:', address)
-      console.log('erc20  contract address:', ERC20_CONTRACT_ADDRESS)
-      // console.log('walletInfo:', walletInfo)
     }
   }, [isConnected, address, caipAddress])
 
@@ -42,17 +37,30 @@ export default function Home() {
     if (isConnected && walletProvider) {
       const ethersProvider = new BrowserProvider(walletProvider as any)
       const balance = await ethersProvider.getBalance(address as any)
-
-      const ethBalance = ethers.formatEther(balance)
-      console.log('bal:', Number(parseFloat(ethBalance).toFixed(5)))
+      const ethBalance = formatEther(balance)
       setBalance(parseFloat(ethBalance).toFixed(5))
-      if (ethBalance !== '0') {
-        return Number(ethBalance)
-      } else {
-        return 0
+    }
+  }
+
+  const getTokenBalance = async () => {
+    if (isConnected && walletProvider && address) {
+      try {
+        const ethersProvider = new BrowserProvider(walletProvider as any)
+        const tokenContract = new Contract(token.address, token.abi, ethersProvider)
+        const balance = await tokenContract.balanceOf(address)
+        setTokenBalance(formatEther(balance))
+      } catch (error) {
+        console.error('Error fetching token balance:', error)
+        toast({
+          title: 'Error',
+          description: 'Failed to fetch token balance',
+          status: 'error',
+          position: 'bottom',
+          variant: 'subtle',
+          duration: 9000,
+          isClosable: true,
+        })
       }
-    } else {
-      return 0
     }
   }
 
@@ -65,51 +73,26 @@ export default function Home() {
     }
   }
 
-  // const updateLoginType = async () => {
-  //   try {
-  //     if (walletInfo != undefined) {
-  //       setLoginType(walletInfo.name ? walletInfo.name : 'Unknown')
-  //     }
-  //   } catch (error) {
-  //     console.error('Error getting login type:', error)
-  //     setLoginType('Unknown')
-  //   }
-  // }
-
-  const openEtherscan = () => {
-    if (address) {
-      const baseUrl = caipAddress === 'eip155:11155111:' ? 'https://sepolia.etherscan.io/address/' : 'https://etherscan.io/address/'
-      window.open(baseUrl + address, '_blank')
-    }
-  }
-
-  // const faucetTx = async () => {
-  //   try {
-  //     const response = await fetch('/api/faucet', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({ address }),
-  //     })
-  //     const data = await response.json()
-  //     if (!response.ok) {
-  //       throw new Error(data.message || 'Faucet request failed')
-  //     }
-  //     return data.txHash
-  //   } catch (error) {
-  //     console.error('Faucet error:', error)
-  //     throw error
-  //   }
-  // }
-
   const doSomething = async () => {
+    if (!mintAmount || parseFloat(mintAmount) <= 0) {
+      toast({
+        title: 'Invalid amount',
+        description: 'Please enter a valid amount to mint',
+        status: 'error',
+        position: 'bottom',
+        variant: 'subtle',
+        duration: 9000,
+        isClosable: true,
+      })
+      return
+    }
+
     setTxHash(undefined)
     try {
       if (!isConnected) {
         toast({
-          title: 'Not connected yet',
-          description: 'Please connect your wallet, my friend.',
+          title: 'Not connected',
+          description: 'Please connect your wallet first',
           status: 'error',
           position: 'bottom',
           variant: 'subtle',
@@ -118,6 +101,7 @@ export default function Home() {
         })
         return
       }
+
       if (walletProvider) {
         setIsLoading(true)
         setTxHash('')
@@ -126,61 +110,46 @@ export default function Home() {
         const signer = await ethersProvider.getSigner()
 
         const nft = new Contract(hamsterverse.address, hamsterverse.abi, signer)
-
-        ///// Send ETH if needed /////
-        // const bal = await getBal()
-        // console.log('bal:', bal)
-        // if (bal < 0.025) {
-        //   const faucetTxHash = await faucetTx()
-        //   console.log('faucet tx:', faucetTxHash)
-        //   const bal = await getBal()
-        //   console.log('bal:', bal)
-        // }
-
-        ///// Approve /////
-
         const erc20 = new Contract(token.address, token.abi, signer)
 
-        const approve = await erc20.approve(hamsterverse.address, parseEther('200'))
+        // Approve
+        const approve = await erc20.approve(hamsterverse.address, parseEther(mintAmount))
         await approve.wait(1)
 
-        ///// Call /////
+        // Mint
         const uri = 'ipfs://bafkreiglxpmys7hxse45nd3ajnjzq2vjjevrlwjphtcco3pd53eq6zqu5i'
-        const call = await nft.mint(signer.address, uri, parseEther('200'))
+        const call = await nft.mint(signer.address, parseEther(mintAmount), uri)
 
-        let receipt: ethers.ContractTransactionReceipt | null = null
-        try {
-          receipt = await call.wait()
-        } catch (error) {
-          console.error('Error waiting for transaction:', error)
-          throw new Error('Transaction failed or was reverted')
-        }
-
-        if (receipt === null) {
-          throw new Error('Transaction receipt is null')
+        const receipt = await call.wait()
+        if (!receipt) {
+          throw new Error('Transaction failed')
         }
 
         console.log('tx:', receipt)
         setTxHash(receipt.hash)
         setTxLink('https://sepolia.etherscan.io/tx/' + receipt.hash)
         setIsLoading(false)
+
+        // Refresh balances
+        await getTokenBalance()
+        await getBal()
+
         toast({
-          title: 'Successful tx',
-          description: 'Well done! 🎉',
+          title: 'Success',
+          description: 'Mint successful! 🎉',
           status: 'success',
           position: 'bottom',
           variant: 'subtle',
           duration: 20000,
           isClosable: true,
         })
-        await getBal()
       }
     } catch (e) {
       setIsLoading(false)
       console.error('Error in doSomething:', e)
       toast({
-        title: 'Woops',
-        description: e instanceof Error ? e.message : 'Something went wrong...',
+        title: 'Error',
+        description: e instanceof Error ? e.message : 'Transaction failed',
         status: 'error',
         position: 'bottom',
         variant: 'subtle',
@@ -190,13 +159,20 @@ export default function Home() {
     }
   }
 
+  const openEtherscan = () => {
+    if (address) {
+      const baseUrl = network.toLowerCase() === 'sepolia' ? 'https://sepolia.etherscan.io/address/' : 'https://etherscan.io/address/'
+      window.open(baseUrl + address, '_blank')
+    }
+  }
+
   return (
     <>
       <Head title={SITE_NAME} description={SITE_DESCRIPTION} />
       <main>
         {!isConnected ? (
           <>
-            <Text>You can login with your email, Google, or with one of many wallets suported by Reown.</Text>
+            <Text>You can login with your email, Google, or with one of many wallets supported by Reown.</Text>
             <br />
           </>
         ) : (
@@ -212,32 +188,51 @@ export default function Home() {
             <Text>
               Network: <strong>{network}</strong>
             </Text>
-            {/* <Text>
-              Login type: <strong>{loginType}</strong>
-            </Text> */}
             <Text>
-              Balance: <strong>{balance} ETH</strong>
+              ETH Balance: <strong>{balance} ETH</strong>
+            </Text>
+            <Text>
+              Token Balance: <strong>{tokenBalance} RGCVII</strong>
             </Text>
             <Text>
               Address: <strong>{address || 'Not connected'}</strong>
             </Text>
           </Box>
         )}
-        <Button
-          colorScheme="blue"
-          variant="outline"
-          type="submit"
-          onClick={doSomething}
-          isLoading={isLoading}
-          loadingText="Minting..."
-          spinnerPlacement="end">
-          Mint
-        </Button>
-        {txHash && isConnected && (
-          <Text py={4} fontSize="14px" color="#45a2f8">
+
+        <Box mb={8}>
+          <FormControl>
+            <FormLabel>Amount to Mint</FormLabel>
+            <InputGroup>
+              <Input
+                type="number"
+                value={mintAmount}
+                onChange={(e) => setMintAmount(e.target.value)}
+                placeholder="Enter amount"
+                disabled={!isConnected}
+                mb={4}
+              />
+              <InputRightAddon>RGCVII</InputRightAddon>
+            </InputGroup>
+          </FormControl>
+
+          <Button
+            colorScheme="blue"
+            variant="outline"
+            onClick={doSomething}
+            isLoading={isLoading}
+            loadingText="Minting..."
+            spinnerPlacement="end"
+            isDisabled={!isConnected || !mintAmount}>
+            Mint
+          </Button>
+        </Box>
+
+        {txHash && (
+          <Text py={4} fontSize="14px" color="blue.400">
             <LinkComponent href={txLink ? txLink : ''}>{txHash}</LinkComponent>
           </Text>
-        )}{' '}
+        )}
       </main>
     </>
   )

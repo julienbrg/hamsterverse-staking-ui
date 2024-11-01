@@ -30,8 +30,8 @@ export function Header(props: Props) {
           <LinkComponent href="/">
             <MenuItem fontSize="md">Home</MenuItem>
           </LinkComponent>
-          <LinkComponent href="/new">
-            <MenuItem fontSize="md">New</MenuItem>
+          <LinkComponent href="/dashboard">
+            <MenuItem fontSize="md">Dashboard</MenuItem>
           </LinkComponent>
         </MenuList>
       </Menu>
